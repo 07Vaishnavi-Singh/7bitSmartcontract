@@ -1,408 +1,91 @@
 // const { expect, assert } = require("chai");
 // const { ethers, getNamedAccounts, network } = require("hardhat")
-const axios = require('axios');
-const { BigNumber, utils, ethers } = require("ethers");
-require('dotenv').config()
-
+// const axios = require('axios');
+// const { BigNumber, utils } = require("ethers");
 // // const {networks}= require("../scripts/networks");
 // const helpers = require("@nomicfoundation/hardhat-network-helpers");
-// // wallet address from hwich the txn is to be made 
- const account = "0x84Ebf92fA78e90832a52F1b8b7c1eb35487c091B";
-const  PRIVATE_KEY = process.env.PRIVATE_KEY;
-const Erc20 =   [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "wethBal_",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "reqAmount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "BadRequest",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "wethBal_",
-        "type": "uint256"
-      }
-    ],
-    "name": "EtherBalanceChange",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from_",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to_",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferSuccessful",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract IERC20",
-        "name": "toToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "boughtAmount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "WithdrawTokens",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "status",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "initialtoTokenBalance",
-        "type": "uint256"
-      }
-    ],
-    "name": "ZeroXCallSuccess",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "maxTransactions",
-        "type": "uint256"
-      }
-    ],
-    "name": "maxTransactionsChange",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "buTokenAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "toTokenBought",
-    "type": "event"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "fallback"
-  },
-  {
-    "inputs": [],
-    "name": "WETH",
-    "outputs": [
-      {
-        "internalType": "contract IWETH",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "toToken",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IERC20",
-        "name": "fromToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "fillQuote",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "maxTransactions",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20[]",
-        "name": "fromToken",
-        "type": "address[]"
-      },
-      {
-        "internalType": "contract IERC20[]",
-        "name": "toToken",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "spender",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address payable[]",
-        "name": "to",
-        "type": "address[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "data",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "amount",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "multiSwap",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "num",
-        "type": "uint256"
-      }
-    ],
-    "name": "setMaxTransactionLimit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdrawETH",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "receive"
-  }
-]
+// require('dotenv').config()
 
 
-async function getQuote(account){
-
-console.log("fetching quote");
-
-const response = await axios.get(
-    `https://arbitrum.api.0x.org/swap/v1/quote?buyToken=0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1&sellToken=WETH&sellAmount=1000000000000000000&slippagePercentage=0.04`
-);
+// describe("AlphaVaultSwap", function() {
 
 
-const params = {
-sellToken: response.sellTokenToken,
-buyToken: response.buyToken ,
-amount:response.sellAmount ,
-takerAddress: account
-}
+//   it("should fill the quote and return the bought amount", async function() {
+    // let provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");
 
+// const address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"; // forked address 
+// await helpers.impersonateAccount(address);           
+// [deployer] = await ethers.getSigners(address);
 
- const swapPriceJSON = await response.data;
-console.log("Swap price : " , swapPriceJSON);
+// const response = await  axios.get(
+//   `https://arbitrum.api.0x.org/swap/v1/quote?buyToken=0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1&sellToken=WETH&sellAmount=1000000000000000000&slippagePercentage=0.04`
+// );
 
-return swapPriceJSON ;
-}
+// let WETH=await ethers.getContractAt("IWETH",
+// response.data.sellTokenAddress,                
+// deployer
+// );
+// // console.log(WETH);
 
+//  let DAI=await ethers.getContractAt("IERC20",
+//                 response.data.buyTokenAddress,
+//                     deployer
+//                     );
 
-async function trySwap(){
+// const params = {
+// sellToken: response.data.sellTokenAddress,
+// buyToken: response.data.buyTokenAddress ,
+// amount:response.data.sellAmount ,
+// takerAddress: deployer.address
+// }
 
-//make signer and providers 
+// const beforeBalance = await WETH.balanceOf(deployer.address) ;
+//  console.log(beforeBalance.toString());
+  
+//  const depositing = await WETH.deposit({ value: params.amount });
+// await  depositing.wait(1);
+// const afterBalance = await WETH.balanceOf(deployer.address) ;
+// console.log(afterBalance.toString());
 
-const provider = new ethers.provider.JsonRpcProvider('');
-const signer = new ethers.Wallet(PRIVATE_KEY,provider);
-const walletAddress = "0x84Ebf92fA78e90832a52F1b8b7c1eb35487c091B";
+// var quote = response.data ;
+// // console.log(quote);
+// var proxy = response.data.allowanceTarget ;
+// // console.log(proxy);
+// var amountstr = (response.data.sellAmount).toString();  // to string error 
+// // console.log(amountstr);
 
-const response = await  axios.get(
-    `https://arbitrum.api.0x.org/swap/v1/quote?buyToken=0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1&sellToken=WETH&sellAmount=1000000000000000000&slippagePercentage=0.04`
-);
+// const approval = await WETH.approve(proxy, amountstr);
+// await approval.wait(1);
+// console.log("-----------------------Approval given------------------------------");
+// // const txParams = {
+// // ...quote,
+// // from : deployer.address ,  
+// //  to: quote.to ,
+// // value:(quote.value).toString(16),
+// // gasPrice : quote.gasPrice,                    // get from the quote 
+// // gas : quote.gas
+// // } 
 
+// const txParams = {
+//   to: quote.to,
+//   value: (quote.value).toString(16),
+//   data: quote.data ,
+//   gasPrice: quote.gasPrice,
+//   gasLimit: quote.gas,
+//   chainId: 31337  // Replace with the appropriate chain ID of local network quote will reteurn the arbitrum one
+// };
 
-const params = {
-sellToken: response.sellToken,
-buyToken: response.buyToken ,
-amount:response.sellAmount ,
-takerAddress: account
-}
+// const transaction = await deployer.sendTransaction(txParams);
 
-const fromTokeAddress = response.sellToken ;
-const amount = await response.amount ;
-console.log("----------------at 53---------------");
+// await transaction.wait(1);
+// console.log("------------------------sent---------------------------------");
 
-var quote = response.data ;
-var proxy = response.allowanceTarget ;
-var amountstr = response.amount; 
+// const lastBalance = await WETH.balanceOf(deployer.address) ;
+// console.log("WETH balance after swap --------",lastBalance.toString());
+// const lastBalanceOfDAI = await DAI.balanceOf(deployer.address) ;
 
-const ERC20Contract = new ethers.Contract(fromTokeAddress , Erc20, signer); // make a signer 
-
-const approval = await ERC20Contract.approval(proxy, amountstr);
-await approval.wait();
-
-const txParams = {
-...quote,
-from : userWallet ,  // addresss of the signer 
- to:quote.to ,
-value:(quote.value).toString(16),
-gasPrice : null,
-gas : quote.gas
-
-}
-await ethereum.request({
-    method: 'eth_sendTransaction',
-    params: [txParams]
-});
-
-console.log("#######################################################################");
-
-}
-
-trySwap();
-
+// console.log("DAI after swap--------",lastBalanceOfDAI.toString() );
+// console.log("#######################################################################");
+//  });
+// });
 

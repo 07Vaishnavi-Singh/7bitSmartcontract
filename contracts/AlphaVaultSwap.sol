@@ -11,11 +11,11 @@ interface IWETH is IERC20 {
 
 contract AlphaVaultSwap is Ownable {
     // AlphaVault custom events
-    event WithdrawTokens(IERC20 toToken, uint256 boughtAmount_);
+    event WithdrawTokens(IERC20 buyToken, uint256 boughtAmount_);
     event EtherBalanceChange(uint256 wethBal_);
     event BadRequest(uint256 wethBal_, uint256 reqAmount_);
-    event ZeroXCallSuccess(bool status, uint256 initialtoTokenBalance);
-    event toTokenBought(uint256 buTokenAmount);
+    event ZeroXCallSuccess(bool status, uint256 initialBuyTokenBalance);
+    event buyTokenBought(uint256 buTokenAmount);
     // event feePercentageChange(uint256 feePercentage);
     event maxTransactionsChange(uint256 maxTransactions);
 
@@ -38,7 +38,7 @@ contract AlphaVaultSwap is Ownable {
     // address private destination;
 
     constructor() {
-        WETH = IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+        WETH = IWETH(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
         maxTransactions = 25;
         // feePercentage = 0;
     }
@@ -49,9 +49,9 @@ contract AlphaVaultSwap is Ownable {
      * as spender
      * @param amount numbers of token to transfer
      */
-    function depositToken(IERC20 fromToken, uint256 amount) private {
+    function depositToken(IERC20 sellToken, uint256 amount) private {
         // require(amount > 0);
-        // ERC20Interface = IERC20(fromToken);
+        // ERC20Interface = IERC20(sellToken);
 
         // if (amount > ERC20Interface.allowance(msg.sender, address(this))) {
         //     emit TransferFailed(msg.sender, address(this), amount);
@@ -59,7 +59,7 @@ contract AlphaVaultSwap is Ownable {
         // }
 
         // bool success = ERC20Interface.transferFrom(msg.sender, address(this), amount);
-        fromToken.transferFrom(msg.sender, address(this), amount);
+        sellToken.transferFrom(msg.sender, address(this), amount);
         emit TransferSuccessful(msg.sender, address(this), amount);
     }
 
@@ -105,44 +105,44 @@ contract AlphaVaultSwap is Ownable {
 
     // Swaps ERC20->ERC20 tokens held by this contract using a 0x-API quote.
     function fillQuote(
-        // The `toTokenAddress` field from the API response.
-        IERC20 toToken,
-        IERC20 fromToken,
+        // The `buyTokenAddress` field from the API response.
+        IERC20 buyToken,
+        IERC20 sellToken,
         // The `allowanceTarget` field from the API response.
         address spender,
         // The `to` field from the API response.
-        address payable to,
+        address payable swapTarget,
         // The `data` field from the API response.
-        bytes calldata data
+        bytes calldata swapCallData
     ) public returns (uint256) {
         require(spender != address(0), "Please provide a valid address");
-        // Track our balance of the toToken to determine how much we've bought.
-        uint256 boughtAmount = toToken.balanceOf(address(this));
-        fromToken.approve(spender, type(uint128).max);
-        (bool success, ) = to.call{value: 0}(data);
+        // Track our balance of the buyToken to determine how much we've bought.
+        uint256 boughtAmount = buyToken.balanceOf(address(this));
+        sellToken.approve(spender, type(uint128).max);
+        (bool success, ) = swapTarget.call{value: 0}(swapCallData);
         emit ZeroXCallSuccess(success, boughtAmount);
         require(success, "SWAP_CALL_FAILED");
-        boughtAmount = toToken.balanceOf(address(this)) - boughtAmount;
-        emit toTokenBought(boughtAmount);
+        boughtAmount = buyToken.balanceOf(address(this)) - boughtAmount;
+        emit buyTokenBought(boughtAmount);
         return boughtAmount;
     }
 
     /**
      * @param amount numbers of token to transfer  in unit256
-     */ 
+     */
     function multiSwap(
-        IERC20[] calldata fromToken,
-        IERC20[] calldata toToken,
+        IERC20[] calldata sellToken,
+        IERC20[] calldata buyToken,
         address[] calldata spender,
-        address payable[] calldata to,
-        bytes[] calldata data,
+        address payable[] calldata swapTarget,
+        bytes[] calldata swapCallData,
         uint256[] memory amount
     ) external payable {
         require(
-            fromToken.length <= maxTransactions &&
-                fromToken.length == toToken.length &&
-                spender.length == toToken.length &&
-                to.length == spender.length,
+            sellToken.length <= maxTransactions &&
+                sellToken.length == buyToken.length &&
+                spender.length == buyToken.length &&
+                swapTarget.length == spender.length,
             "Please provide valid data"
         );
 
@@ -170,9 +170,9 @@ contract AlphaVaultSwap is Ownable {
                 continue;
             }
             // Condition For using Deposited Ether before using WETH From user balance.
-            if (fromToken[i] == WETH) {
-                if (fromToken[i] == toToken[i]) {
-                    depositToken(fromToken[i], amount[i]);
+            if (sellToken[i] == WETH) {
+                if (sellToken[i] == buyToken[i]) {
+                    depositToken(sellToken[i], amount[i]);
                     eth_balance += amount[i];
                     emit EtherBalanceChange(eth_balance);
                     continue;
@@ -180,24 +180,24 @@ contract AlphaVaultSwap is Ownable {
                 eth_balance -= amount[i];
                 emit EtherBalanceChange(eth_balance);
             } else {
-                depositToken(fromToken[i], amount[i]);
+                depositToken(sellToken[i], amount[i]);
             }
 
             // Variable to store amount of tokens purchased.
             uint256 boughtAmount = fillQuote(
-                toToken[i],
-                fromToken[i],
+                buyToken[i],
+                sellToken[i],
                 spender[i],
-                to[i],
-                data[i]
+                swapTarget[i],
+                swapCallData[i]
             );
 
-            if (toToken[i] == WETH) {
+            if (buyToken[i] == WETH) {
                 eth_balance += boughtAmount;
                 emit EtherBalanceChange(eth_balance);
             } else {
-                withdrawToken(toToken[i], boughtAmount);
-                emit WithdrawTokens(toToken[i], boughtAmount);
+                withdrawToken(buyToken[i], boughtAmount);
+                emit WithdrawTokens(buyToken[i], boughtAmount);
             }
         }
         if (eth_balance > 0) {
