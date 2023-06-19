@@ -13,7 +13,7 @@
     
 //     beforeEach(async function() {
 
-        
+  
         
 //     });
 
@@ -39,10 +39,10 @@
 //                 );
 
 //             // binance 1
-//             // let response = await axios.get(
-//             //     `https://bsc.api.0x.org/swap/v1/quote?buyToken=DAI&sellToken=WBNB&sellAmount=1000000000000000000&slippagePercentage=0.04`
+       //     // let response = await axios.get(
+     //       //     `https://bsc.api.0x.org/swap/v1/quote?buyToken=DAI&sellToken=WBNB&sellAmount=1000000000000000000&slippagePercentage=0.04`
 
-//             //       );
+         //   //       );
                 
 //             // bianance 2
 //             // let response = await axios.get(
@@ -88,32 +88,32 @@
 //               );
 
  
-//                   swapQuoteJSON=response.data;
-//             let WETH=await ethers.getContractAt("IWETH",
-//                 response.data.sellTokenAddress,
-//                 deployer
-//                 );
-//                 // const user_balance1=await WETH.balanceOf(deployer.address);
-//                 // console.log("-------------",user_balance1.toString(),"----------------");
-//                 // await WETH.deposit({
-//                     //     value: 10000000000000
-//                     // }); 
-//                     console.log("at line 70");
+            //       swapQuoteJSON=response.data;
+            // let WETH=await ethers.getContractAt("IWETH",
+            //     response.data.sellTokenAddress,
+            //     deployer
+            //     );
+            //     // const user_balance1=await WETH.balanceOf(deployer.address);
+            //     // console.log("-------------",user_balance1.toString(),"----------------");
+            //     // await WETH.deposit({
+            //         //     value: 10000000000000
+            //         // }); 
+            //         console.log("at line 70");
                     
-//                     const max_approve= BigInt("1157920892373161954235709850086879078532699846656405640394575840079131296399");
-//                     // const txResponseWETH= await WETH.approve(response.data.allowanceTarget,max_approve)
-//                     console.log("---------------------At line 74------------------");
-//                     const txResponseWETH1= await WETH.approve(alphaVaultSwap.address,max_approve)
-//                     console.log("at line 76");
-//                     // await txResponseWETH.wait(1);
-//                     await txResponseWETH1.wait(1);
-//                     console.log(deployer.address);
-//                     let allowance1 = await WETH.allowance(deployer.address,alphaVaultSwap.address);
-//                     console.log("--------80---")
-//                     console.log(allowance1.toString());
-//                     const user_balance2=await WETH.balanceOf(deployer.address);
-//                     console.log("at line 82");
-//                     console.log("-------------",user_balance2.toString(),"----------------");
+            //         const max_approve= BigInt("1157920892373161954235709850086879078532699846656405640394575840079131296399");
+            //         // const txResponseWETH= await WETH.approve(response.data.allowanceTarget,max_approve)
+            //         console.log("---------------------At line 74------------------");
+            //         const txResponseWETH1= await WETH.approve(alphaVaultSwap.address,max_approve)
+            //         console.log("at line 76");
+            //         // await txResponseWETH.wait(1);
+            //         await txResponseWETH1.wait(1);
+            //         console.log(deployer.address);
+            //         let allowance1 = await WETH.allowance(deployer.address,alphaVaultSwap.address);
+            //         console.log("--------80---")
+            //         console.log(allowance1.toString());
+            //         const user_balance2=await WETH.balanceOf(deployer.address);
+            //         console.log("at line 82");
+            //         console.log("-------------",user_balance2.toString(),"----------------");
              
 
 //                 // console.log("at Line 91");
